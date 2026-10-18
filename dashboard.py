@@ -26,29 +26,42 @@ st.set_page_config(page_title="MED · Research Dashboard", page_icon="🩺", lay
 
 st.markdown("""
 <style>
-:root { color-scheme: light; }
-.block-container { max-width: 1180px; padding-top: 2rem; }
-div[data-testid="stMetric"] {
-  background: #f0f1f2; border: 1px solid #d9dcdf;
-  border-radius: 14px; padding: 15px;
+/* MED Interface 2.0: MESM-aligned compact, clear monochrome layout */
+.block-container { max-width: 1320px; padding-top: 1.45rem; padding-bottom: 3rem; }
+[data-testid="stSidebar"] { border-right: 1px solid rgba(125,125,125,.22); }
+[data-testid="stMetric"] {
+  border: 1px solid rgba(125,125,125,.22);
+  background: rgba(125,125,125,.055);
+  border-radius: 9px; padding: 15px;
 }
+[data-testid="stMetricLabel"] { font-weight: 500; }
+[data-testid="stDataFrame"] { border: 1px solid rgba(125,125,125,.2); border-radius: 8px; }
+.stButton button, [data-testid="stDownloadButton"] button { border-radius: 7px; }
+h1, h2, h3 { letter-spacing: -.025em; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("MED")
-st.caption("Независимый медицинский исследовательский модуль · L3")
-st.info("Исследовательский стенд. Данные реестров и демонстрационные расчёты не являются диагнозом или рекомендацией по лечению.")
+sections = ["Обзор", "Исследования", "Аналитика", "Медицинские направления",
+            "Каталог источников", "Новые источники", "Файлы источников",
+            "Документы", "Тестирование"]
+section = st.sidebar.radio("MED · Разделы", sections)
+st.sidebar.caption("L3 · самостоятельный исследовательский модуль")
+st.sidebar.caption("CORE / L2 подключаются отдельно")
 
-section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Медицинские направления", "Каталог источников", "Новые источники", "Файлы источников", "Документы", "Тестирование"])
-st.sidebar.caption("MED работает независимо от CORE, L2 и приложения GENESIS.")
-st.sidebar.markdown("### Сводка MED")
-if st.sidebar.button("Сформировать общий отчёт", type="primary", use_container_width=True):
-    st.session_state["med_consolidated_report"] = generate_research_report()
-if "med_consolidated_report" in st.session_state:
-    st.sidebar.download_button("Скачать общую сводку · JSON",
-        json.dumps(st.session_state["med_consolidated_report"], ensure_ascii=False, indent=2),
-        file_name="med-full-report.json", mime="application/json", use_container_width=True)
-    st.sidebar.caption("Отчёт сформирован по локальному архиву; сетевые запросы отдельно.")
+heading, report_area = st.columns([5, 2], vertical_alignment="center")
+with heading:
+    st.title("MED")
+    st.caption("MEDICAL RESEARCH SYSTEM  /  L3  /  RESEARCH DASHBOARD")
+with report_area:
+    if st.button("Отчёт · все разделы", type="primary", use_container_width=True):
+        st.session_state["med_consolidated_report"] = generate_research_report()
+    if "med_consolidated_report" in st.session_state:
+        st.download_button("Скачать сводный отчёт", json.dumps(
+            st.session_state["med_consolidated_report"], ensure_ascii=False, indent=2),
+            "med-full-report.json", mime="application/json", use_container_width=True)
+st.caption("Раздел: " + section + "  /  Источники, методы и история обновлений — внизу каждой страницы")
+st.divider()
+st.info("Исследовательские метаданные и демонстрационные модели. Не предназначено для постановки диагноза или назначения лечения.")
 
 
 def summary():
