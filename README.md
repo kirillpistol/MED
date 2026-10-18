@@ -23,6 +23,23 @@ Try when MED is running:
 curl -fsSG 'http://127.0.0.1:18091/research/publications' --data-urlencode 'q=machine learning diagnosis' --data-urlencode 'limit=5'
 ```
 
+## Клинические исследования и история изменений
+
+- `GET /research/studies?q=diabetes&limit=5` — поиск и нормализация публичных регистрационных записей ClinicalTrials.gov API v2.
+- `GET /research/studies/NCT12345678/history` — сохранённые версии конкретной записи, если они действительно встречались при сборе.
+- По каждому исследованию сохраняются NCT, название, статус, дата последнего обновления, тип и фаза исследования, изучаемые состояния, вмешательства, URL и SHA-256 исходной записи.
+- Каждая новая контрольная сумма создаёт новую версию документа. Повтор идентичной записи не создаёт дубликата.
+- Хранилище `med_history` — выделенный Docker volume с SQLite, **только метаданные общедоступных исследований**. Реальные клинические случаи и сведения о пациентах не записываются.
+- `config/sources.json` фиксирует подключённые адаптеры. Для более широкого реестра см. `docs/SOURCES.md`.
+
+### Проверка после запуска
+
+```bash
+curl -fsSG http://127.0.0.1:18091/research/studies --data-urlencode 'q=diabetes' --data-urlencode 'limit=3'
+```
+
+Выход в интернет нужен для запросов к публичным реестрам. Публикация портов ограничена `127.0.0.1`; это не защищает данные при неправильной прокси-конфигурации. Endpoint истории не содержит персональных данных.
+
 ## Local tests
 From repository root with Python and FastAPI installed:
 
@@ -45,7 +62,7 @@ If host port publishing is unavailable (as occurred with a previous internal-net
 docker exec genesis-med-standalone python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8091/healthz').read().decode())"
 ```
 
-The container has its own internal network, no access to the existing GENESIS API network, runs as a non-root user, does not mount secrets, and has no persistent data volume. **Do not send real patient data.**
+The container runs as a non-root user on its own Docker network, publishes only to VPS localhost, and has outbound access to public research registries. Its dedicated Docker volume stores **only public ClinicalTrials.gov metadata versions**, not patient cases. No GENESIS CORE or Android integration is configured. **Do not send real patient data.**
 
 ## Источники, документы и модель данных
 
