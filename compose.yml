@@ -12,6 +12,7 @@ services:
       retries: 3
       start_period: 20s
     environment:
+      MED_TOPOLOGY: single-host
       MED_HISTORY_DB: /var/lib/med/research.sqlite3
       MED_REPORTS_DB: /var/lib/med/reports.sqlite3
     volumes:
@@ -35,6 +36,7 @@ services:
     ports:
       - "127.0.0.1:18501:8501"
     environment:
+      MED_TOPOLOGY: single-host
       MED_HISTORY_DB: /var/lib/med/research.sqlite3
       MED_COLLECTION_DB: /var/lib/med/collection.sqlite3
       MED_DISCOVERY_DB: /var/lib/med/discovery.sqlite3
@@ -59,6 +61,7 @@ services:
     restart: unless-stopped
     command: ["python", "discovery_worker.py", "serve"]
     environment:
+      MED_TOPOLOGY: single-host
       MED_DISCOVERY_DB: /var/lib/med/discovery.sqlite3
       MED_DISCOVERY_INTERVAL_HOURS: "24"
     volumes:
@@ -80,6 +83,7 @@ services:
     restart: unless-stopped
     command: ["python", "collector.py", "serve"]
     environment:
+      MED_TOPOLOGY: single-host
       MED_HISTORY_DB: /var/lib/med/research.sqlite3
       MED_COLLECTION_DB: /var/lib/med/collection.sqlite3
     volumes:
