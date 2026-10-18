@@ -1,0 +1,16 @@
+{
+  "schedule_hours": 6,
+  "queries": [
+    {
+      "source": "pubmed",
+      "term": "clinical decision support",
+      "limit": 5
+    },
+    {
+      "source": "clinicaltrials",
+      "term": "clinical decision support",
+      "limit": 5
+    }
+  ],
+  "notes": "Public research metadata only. No patient records. Each cycle is bounded and sequential."
+}
