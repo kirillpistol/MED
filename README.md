@@ -47,6 +47,15 @@ docker exec genesis-med-standalone python -c "import urllib.request; print(urlli
 
 The container has its own internal network, no access to the existing GENESIS API network, runs as a non-root user, does not mount secrets, and has no persistent data volume. **Do not send real patient data.**
 
+## Источники, документы и модель данных
+
+- [Реестр источников и первичные документы](docs/SOURCES.md)
+- [Планируемая структура данных и прослеживаемость](docs/DATA_MODEL.md)
+- [План развития MED](docs/ROADMAP.md)
+- [Машиночитаемый реестр](config/sources.json)
+
+Статус **connected** означает реализованный адаптер, но не результат проверки подключения на VPS. Статус **candidate** — подключение ещё не выполнено.
+
 ## Future phases
 - Specification of MED diagnosis-domain calculations with medical expert validation and real data schemas.
 - Separate encrypted persistence with explicit provenance and retention, protected audit and access controls.
