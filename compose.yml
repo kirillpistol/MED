@@ -1,0 +1,21 @@
+services:
+  med:
+    build: .
+    container_name: genesis-med-standalone
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18091:8091"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    mem_limit: 256m
+    cpus: 0.5
+    networks:
+      - med_private
+networks:
+  med_private:
+    internal: true
