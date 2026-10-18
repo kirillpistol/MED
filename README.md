@@ -63,6 +63,51 @@ curl -fsSG http://127.0.0.1:18091/research/studies --data-urlencode 'q=diabetes'
 
 `analytics.py` — отдельный расчётный модуль, `tests/test_analytics.py` — тестирование версий, изменений и пустой базы.
 
+## MED Dashboard — самостоятельный интерфейс (как MESM)
+
+Интерактивная панель Streamlit `dashboard.py`: **Обзор**, **Исследования**, **Аналитика**, **Документы** и **Тестирование**. Интерфейс русскоязычный; загружает публичные метаданные из PubMed и ClinicalTrials.gov, просматривает результаты SQLite Analytics, выполняет ручной цикл сборщика, показывает версионность NCT и экспортирует JSON-отчёт.
+
+### Запуск на Windows PowerShell
+
+```powershell
+git clone https://github.com/kirillpistol/MED.git
+cd MED
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+$env:MED_HISTORY_DB = "$PWD\med-history.sqlite3"
+$env:MED_COLLECTION_DB = "$PWD\med-collection.sqlite3"
+.\.venv\Scripts\python.exe -m streamlit run dashboard.py
+```
+
+Откройте `http://localhost:8501`. Если установлен Python под именем `python`, замените `py` в команде создания окружения на `python`. Вносить реальную медицинскую информацию пациентов нельзя.
+
+### На независимом Docker стенде
+
+После клонирования MED на Linux, из корня репозитория:
+
+```bash
+docker compose up -d --build
+docker compose ps
+docker logs genesis-med-dashboard --tail 60
+```
+
+Dashboard доступен **только на серверном localhost:18501**, без публичного проброса. Чтобы открыть в браузере Windows с известного тестового VPS, сделайте SSH-туннель в отдельном PowerShell:
+
+```powershell
+ssh -i "$env:USERPROFILE\.ssh\id_ed25519" -L 18501:127.0.0.1:18501 root@194.67.120.173
+```
+
+Откройте `http://localhost:18501`. Не публикуйте интерфейс наружу без отдельной аутентификации и настройки доступа. Настоящая эксплуатация на VPS и успешная проверка тестов пока не подтверждены.
+
+### Что проверить вручную
+
+1. **Обзор** — нулевые показатели до сборки, обновление запускает цикл публичных источников.
+2. **Исследования** — выбор PubMed/ClinicalTrials.gov, поиск терминов, ссылка на оригинал и дата получения.
+3. **Аналитика** — количество исследований, версии, статусы, фазы и изменения.
+4. **Документы** — скачивание агрегированного JSON и история NCT.
+5. **Тестирование** — локальные команды проверки; страница не подменяет реальный прогон unit-тестов.
+
 ## Local tests
 From repository root with Python and FastAPI installed:
 
