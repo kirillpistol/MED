@@ -20,6 +20,27 @@ services:
     cpus: 0.5
     networks:
       - med_private
+  med_collector:
+    build: .
+    container_name: genesis-med-collector
+    restart: unless-stopped
+    command: ["python", "collector.py", "serve"]
+    environment:
+      MED_HISTORY_DB: /var/lib/med/research.sqlite3
+      MED_COLLECTION_DB: /var/lib/med/collection.sqlite3
+    volumes:
+      - med_history:/var/lib/med
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    mem_limit: 256m
+    cpus: 0.5
+    networks:
+      - med_private
 networks:
   med_private:
     internal: false
