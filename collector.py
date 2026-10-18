@@ -16,6 +16,7 @@ from pathlib import Path
 from clinical_trials import search_studies
 from history import archive_public_studies
 from research import search_publications
+from discovery import discover
 
 CONFIG_PATH = Path(__file__).resolve().parent / "config" / "collection.json"
 LOG_PATH_ENV = "MED_COLLECTION_DB"
@@ -108,7 +109,8 @@ def main() -> int:
     config = _config()
     while True:
         rows = run_cycle(config)
-        print(json.dumps(rows, ensure_ascii=False), flush=True)
+        discovered = discover()
+        print(json.dumps({"collection": rows, "discovery": discovered}, ensure_ascii=False), flush=True)
         if mode == "once":
             return 1 if any(row["status"] == "error" for row in rows) else 0
         time.sleep(config["schedule_hours"] * 3600)
