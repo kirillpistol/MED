@@ -5,6 +5,10 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:18091:8091"
+    environment:
+      MED_HISTORY_DB: /var/lib/med/research.sqlite3
+    volumes:
+      - med_history:/var/lib/med
     read_only: true
     security_opt:
       - no-new-privileges:true
@@ -18,4 +22,7 @@ services:
       - med_private
 networks:
   med_private:
-    internal: true
+    internal: false
+
+volumes:
+  med_history:
