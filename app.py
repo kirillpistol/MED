@@ -15,6 +15,7 @@ from analytics import study_analytics
 from reports import generate_research_report
 from quality import archive_quality
 from integration import integration_status
+from documents import publish_report, list_reports, get_report
 import re
 import sqlite3
 
@@ -161,3 +162,22 @@ def study_source_quality():
 def med_integration_status():
     """Versioned, non-patient MED L3 status for future CORE/L2 orchestration."""
     return integration_status()
+
+@app.post("/documents/research", status_code=201)
+def create_research_document():
+    """Persist a public, aggregate research report for later L2 consumption."""
+    try:
+        return publish_report(generate_research_report())
+    except Exception:
+        raise HTTPException(status_code=503, detail="Report publishing unavailable")
+
+@app.get("/documents")
+def documents_index(limit: int = Query(default=50, ge=1, le=100)):
+    return list_reports(limit=limit)
+
+@app.get("/documents/{document_id}")
+def document_details(document_id: str):
+    result = get_report(document_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return result
