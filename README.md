@@ -204,6 +204,10 @@ Dashboard позволяет сформировать отчёт и выбрат
 
 Текущая конфигурация рассчитана на один VPS с локальным SQLite и общим Docker-томом. Явный профиль `MED_TOPOLOGY=single-host` и модуль `deployment.py` не допускают ошибочного объявления неподдерживаемого распределённого режима. План миграции к PostgreSQL, объектному хранилищу и независимым серверам — [docs/DEPLOYMENT_TOPOLOGY.md](docs/DEPLOYMENT_TOPOLOGY.md). Тесты профиля: `tests/test_deployment.py`.
 
+## Персональные исследования и сканированные книги
+
+Предварительный L2-bound контракт `private_documents.py` позволяет описать персональные анализы и отсканированные медицинские книги с явной областью разрешённой обработки. Содержимое и личные данные сейчас не принимаются и не сохраняются в MED. Подробнее: [docs/PRIVATE_RESEARCH_AND_BOOKS.md](docs/PRIVATE_RESEARCH_AND_BOOKS.md). Тесты: `tests/test_private_documents.py`. Для реальной загрузки нужны функции L2, OCR, контроль прав доступа, обработка файлов и приватный поиск RAG.
+
 ## Local tests
 From repository root with Python and FastAPI installed:
 
