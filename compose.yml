@@ -45,6 +45,27 @@ services:
     cpus: 1.0
     networks:
       - med_private
+  med_discovery:
+    build: .
+    container_name: genesis-med-discovery
+    restart: unless-stopped
+    command: ["python", "discovery_worker.py", "serve"]
+    environment:
+      MED_DISCOVERY_DB: /var/lib/med/discovery.sqlite3
+      MED_DISCOVERY_INTERVAL_HOURS: "24"
+    volumes:
+      - med_history:/var/lib/med
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    mem_limit: 256m
+    cpus: 0.5
+    networks:
+      - med_private
   med_collector:
     build: .
     container_name: genesis-med-collector
