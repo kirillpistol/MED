@@ -1,0 +1,42 @@
+# MED — standalone prototype (v0.1)
+
+**MED is independent of GENESIS CORE, L2 and L3.** It can run on a shared test VPS today or migrate to an independent host later. No production integration, real traffic capture, patient information, VPN provisioning, or medical diagnosis occurs in this release.
+
+## Pipeline
+1. Accept an **explicitly synthetic** JSON case with bounded enumerated observations.
+2. Validate it (no free-text names, IDs restricted to simple local case IDs; duplicate feature codes rejected).
+3. Apply deterministic weighted overlaps against three **illustrative syndrome patterns**, not medical diagnostic classes.
+4. Return ranked pattern matches, trace metadata, algorithm version and SHA-256 input fingerprint.
+5. Return optional JSON report. No persistent storage in v0.1.
+
+Scores are similarity measures **not calibrated probabilities**. No clinical use, diagnosis, treatment or triage is authorized. Real clinical deployment would require clinician-led scope definition, dataset provenance, validation and applicable privacy/security compliance.
+
+## Local tests
+From repository root with Python and FastAPI installed:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+## Independent VPS Docker test
+On the existing Linux test VPS after pulling updated branch, without touching GENESIS API:
+
+```bash
+cd /opt/med-release
+docker compose -f compose.yml up -d --build
+curl -fsS http://127.0.0.1:18091/healthz
+curl -fsS -X POST http://127.0.0.1:18091/v1/analyze -H 'Content-Type: application/json' -d '{"case_id":"demo-001","synthetic":true,"observations":[{"code":"fever","present":true},{"code":"cough","present":true}]}'
+```
+
+If host port publishing is unavailable (as occurred with a previous internal-network-only test), verify inside the container:
+```bash
+docker exec genesis-med-standalone python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8091/healthz').read().decode())"
+```
+
+The container has its own internal network, no access to the existing GENESIS API network, runs as a non-root user, does not mount secrets, and has no persistent data volume. **Do not send real patient data.**
+
+## Future phases
+- Specification of MED diagnosis-domain calculations with medical expert validation and real data schemas.
+- Separate encrypted persistence with explicit provenance and retention, protected audit and access controls.
+- A strictly authenticated versioned MED → CORE contract; then integration into GENESIS Android.
+- Migration from shared VPS to independent MED host by changing environment networking, without embedding MED in CORE.
