@@ -6,7 +6,7 @@
       "provider": "NCBI / U.S. National Library of Medicine",
       "type": "biomedical_publications",
       "endpoint": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
-      "status": "candidate",
+      "status": "connected",
       "access": "public_metadata_only",
       "personal_data": false
     },
