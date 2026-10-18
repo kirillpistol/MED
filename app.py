@@ -14,6 +14,7 @@ from history import archive_public_studies, study_history
 from analytics import study_analytics
 from reports import generate_research_report
 from quality import archive_quality
+from integration import integration_status
 import re
 import sqlite3
 
@@ -155,3 +156,8 @@ def study_source_quality():
         return archive_quality()
     except Exception:
         raise HTTPException(status_code=503, detail="Quality check temporarily unavailable")
+
+@app.get("/integration/status")
+def med_integration_status():
+    """Versioned, non-patient MED L3 status for future CORE/L2 orchestration."""
+    return integration_status()
