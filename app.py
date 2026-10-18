@@ -6,10 +6,11 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from typing import Literal
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
+from research import search_publications
 
-app = FastAPI(title="MED", version="0.1.0", docs_url=None, redoc_url=None)
+app = FastAPI(title="MED", docs_url=None, redoc_url=None)
 
 # These are illustrative *syndrome labels*, not validated medical diagnoses.
 CATALOG = {
@@ -18,7 +19,7 @@ CATALOG = {
     "neurologic_pattern": {"headache": 2, "dizziness": 2, "confusion": 3},
 }
 ALLOWED = sorted({feature for weights in CATALOG.values() for feature in weights})
-MODEL_VERSION = "med-pattern-demo-v1"
+MODEL_VERSION = "med-pattern-demo"
 
 
 class Observation(BaseModel):
@@ -75,17 +76,28 @@ def health():
     return {"status": "ok", "service": "med"}
 
 
-@app.post("/v1/analyze")
+@app.post("/analyze")
 def analyze(case: CaseRequest):
-    from fastapi import HTTPException
     try:
         return calculate(case)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@app.post("/v1/report")
+@app.post("/report")
 def report(case: CaseRequest):
     result = analyze(case)
     return {"report_type": "med-synthetic-analysis", "created_at": datetime.now(timezone.utc).isoformat(),
             "report": result}
+
+@app.get("/research/publications")
+def publications(q: str = Query(min_length=3, max_length=120),
+                 limit: int = Query(default=5, ge=1, le=10)):
+    """Read-only public PubMed bibliographic discovery; no patient information."""
+    try:
+        return search_publications(q, limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception:
+        # Do not expose upstream URLs or diagnostic details through the public API.
+        raise HTTPException(status_code=503, detail="Research provider temporarily unavailable")
