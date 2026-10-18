@@ -11,6 +11,7 @@ import streamlit as st
 
 from analytics import study_analytics
 from reports import generate_research_report
+from quality import archive_quality
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from research import search_publications
@@ -114,6 +115,11 @@ elif section == "Аналитика":
             st.bar_chart(data["phase_counts"])
         else:
             st.info("Нет данных по фазам.")
+    st.markdown("#### Качество архивных метаданных")
+    quality = archive_quality()
+    st.write("Проверено:", quality["checked"], "· Пройдено:", quality["passed"], "· С замечаниями:", quality["failed"])
+    if quality["issue_counts"]:
+        st.dataframe([{"Проблема": key, "Количество": count} for key, count in quality["issue_counts"].items()], hide_index=True)
     st.markdown("#### Изменения документов")
     if data["changes"]:
         st.dataframe(data["changes"], use_container_width=True, hide_index=True)
