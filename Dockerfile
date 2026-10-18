@@ -4,7 +4,7 @@ WORKDIR /srv/med
 RUN groupadd --system med && useradd --system --gid med med
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py research.py clinical_trials.py history.py collector.py analytics.py reports.py quality.py themes.py source_catalog.py file_registry.py discovery.py collector_status.py discovery_worker.py dashboard.py ./
+COPY app.py research.py clinical_trials.py history.py collector.py analytics.py reports.py quality.py themes.py source_catalog.py file_registry.py discovery.py collector_status.py discovery_worker.py dashboard.py integration.py ./
 COPY config/collection.json config/extended_sources.json config/file_sources.json ./config/
 RUN mkdir -p /var/lib/med && chown med:med /var/lib/med
 USER med
