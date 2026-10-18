@@ -13,6 +13,7 @@ from analytics import study_analytics
 from reports import generate_research_report
 from quality import archive_quality
 from themes import THEMES, summarize_themes
+from source_catalog import source_catalog
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from research import search_publications
@@ -35,7 +36,7 @@ st.title("MED")
 st.caption("Независимый медицинский исследовательский модуль · L3")
 st.info("Исследовательский стенд. Данные реестров и демонстрационные расчёты не являются диагнозом или рекомендацией по лечению.")
 
-section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Медицинские направления", "Документы", "Тестирование"])
+section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Медицинские направления", "Каталог источников", "Документы", "Тестирование"])
 st.sidebar.caption("MED работает независимо от CORE, L2 и приложения GENESIS.")
 st.sidebar.markdown("### Сводка MED")
 if st.sidebar.button("Сформировать общий отчёт", type="primary", use_container_width=True):
@@ -172,6 +173,26 @@ elif section == "Медицинские направления":
         except Exception:
             st.error("Источник временно недоступен.")
     st.caption("Тематическая классификация выполняется по ключевым словам. Совпадения могут пересекаться.")
+
+elif section == "Каталог источников":
+    st.subheader("Реестр источников MED")
+    st.caption("Новые ресурсы пока являются кандидатами: подключение и загрузка не выполняются.")
+    category_labels = {"russia": "Государственные ресурсы РФ",
+                       "regenerative": "Регенеративная медицина и протеомика",
+                       "bioprinting": "Биопринтинг",
+                       "neuro": "Нейроинтерфейсы"}
+    category = st.selectbox("Группа", list(category_labels), format_func=lambda item: category_labels[item])
+    catalog = source_catalog(category=category)
+    st.metric("Источников в разделе", catalog["count"])
+    for entry in catalog["sources"]:
+        with st.expander(entry["name"]):
+            st.write("Категория данных:", entry["data_kind"])
+            st.write("Статус:", entry["status"], "· Проверка:", entry["validation"])
+            st.write("Условия доступа:", entry["access"])
+            st.markdown("[Открыть ресурс](" + entry["url"] + ")")
+            if entry.get("companion"):
+                st.markdown("[Документация / сторонний проект](" + entry["companion"] + ")")
+    st.info("Каталог не загружает содержимое, не запускает сторонние парсеры и не хранит персональные данные.")
 
 elif section == "Документы":
     st.subheader("Единая сводка MED · все разделы")
