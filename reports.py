@@ -23,15 +23,18 @@ def generate_research_report(db_path: str | None = None) -> dict[str, Any]:
         "phase_counts": result["phase_counts"],
         "changes": result["changes"],
     }
-    canonical = json.dumps(calculation, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    quality = archive_quality(db_path)
+    themes = summarize_themes(db_path)
+    canonical = json.dumps({"analytics": calculation, "quality": quality, "themes": themes},
+                           sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     return {
         "report_type": REPORT_SCHEMA,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "data_checksum_sha256": digest,
         "data": calculation,
-        "data_quality": archive_quality(db_path),
-        "research_themes": summarize_themes(db_path),
+        "data_quality": quality,
+        "research_themes": themes,
         "sections": ["Обзор", "Исследования", "Аналитика", "Качество данных", "Кровь", "Заболевания", "Повреждения", "Восстановление тканей", "Технологии улучшения функций организма", "Документы"],
         "methods": {
             "studies": "Count distinct NCT identifiers in local public-metadata archive.",
