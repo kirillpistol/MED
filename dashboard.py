@@ -21,6 +21,7 @@ from history import archive_public_studies, study_history
 from research import search_publications
 from collector import run_cycle, _config
 from collector_status import collection_status
+from documents import publish_report, list_reports
 
 st.set_page_config(page_title="MED · Research Dashboard", page_icon="🩺", layout="wide")
 
@@ -56,6 +57,8 @@ with report_area:
     if st.button("Отчёт · все разделы", type="primary", use_container_width=True):
         st.session_state["med_consolidated_report"] = generate_research_report()
     if "med_consolidated_report" in st.session_state:
+        if st.button("Сохранить в каталог документов", use_container_width=True):
+            st.session_state["med_published_document"] = publish_report(st.session_state["med_consolidated_report"])
         st.download_button("Скачать сводный отчёт", json.dumps(
             st.session_state["med_consolidated_report"], ensure_ascii=False, indent=2),
             "med-full-report.json", mime="application/json", use_container_width=True)
@@ -237,6 +240,12 @@ elif section == "Файлы источников":
 
 elif section == "Документы":
     st.subheader("Единая сводка MED · все разделы")
+    st.markdown("#### Каталог опубликованных отчётов")
+    stored = list_reports()["documents"]
+    if stored:
+        st.dataframe(stored, use_container_width=True, hide_index=True)
+    else:
+        st.info("Каталог пока пуст. Сформируйте и сохраните отчёт через кнопку сверху.")
     data = generate_research_report()
     payload = json.dumps(data, ensure_ascii=False, indent=2)
     st.download_button("Скачать полный отчёт JSON", payload, "med-full-report.json",
