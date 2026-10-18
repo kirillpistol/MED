@@ -13,6 +13,7 @@ from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from analytics import study_analytics
 from reports import generate_research_report
+from quality import archive_quality
 import re
 import sqlite3
 
@@ -146,3 +147,11 @@ def research_report():
         return generate_research_report()
     except Exception:
         raise HTTPException(status_code=503, detail="Research report temporarily unavailable")
+
+@app.get("/quality/studies")
+def study_source_quality():
+    """Completeness and provenance checks for locally archived public metadata."""
+    try:
+        return archive_quality()
+    except Exception:
+        raise HTTPException(status_code=503, detail="Quality check temporarily unavailable")
