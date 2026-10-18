@@ -15,10 +15,12 @@ from quality import archive_quality
 from themes import THEMES, summarize_themes
 from source_catalog import source_catalog
 from file_registry import file_inventory
+from discovery import discover, discovery_inventory
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from research import search_publications
 from collector import run_cycle, _config
+from collector_status import collection_status
 
 st.set_page_config(page_title="MED · Research Dashboard", page_icon="🩺", layout="wide")
 
@@ -37,7 +39,7 @@ st.title("MED")
 st.caption("Независимый медицинский исследовательский модуль · L3")
 st.info("Исследовательский стенд. Данные реестров и демонстрационные расчёты не являются диагнозом или рекомендацией по лечению.")
 
-section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Медицинские направления", "Каталог источников", "Файлы источников", "Документы", "Тестирование"])
+section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Медицинские направления", "Каталог источников", "Новые источники", "Файлы источников", "Документы", "Тестирование"])
 st.sidebar.caption("MED работает независимо от CORE, L2 и приложения GENESIS.")
 st.sidebar.markdown("### Сводка MED")
 if st.sidebar.button("Сформировать общий отчёт", type="primary", use_container_width=True):
@@ -195,6 +197,19 @@ elif section == "Каталог источников":
                 st.markdown("[Документация / сторонний проект](" + entry["companion"] + ")")
     st.info("Каталог не загружает содержимое, не запускает сторонние парсеры и не хранит персональные данные.")
 
+elif section == "Новые источники":
+    st.subheader("Обнаружение новых исследовательских ресурсов")
+    st.caption("Поиск через OpenAlex. Находки — кандидаты; доверенными источниками автоматически не становятся.")
+    if st.button("Найти новые сайты и направления", type="primary"):
+        with st.spinner("Поиск публичных исследовательских метаданных..."):
+            st.dataframe(discover(), hide_index=True, use_container_width=True)
+    entries = discovery_inventory()
+    st.metric("Кандидатов в локальной очереди", len(entries))
+    if entries:
+        st.dataframe(entries, use_container_width=True, hide_index=True)
+    else:
+        st.info("Запустите поиск или фоновый сборщик, чтобы сформировать перечень.")
+
 elif section == "Файлы источников":
     st.subheader("Версии файлов источников")
     st.caption("Учёт локально полученных официальных файлов. Автоматическая загрузка по URL пока не активирована.")
@@ -241,3 +256,19 @@ else:
     st.write("Проверка API: `GET /healthz`, `GET /analytics/studies`.")
     st.write("Проверка сборщика: `python collector.py once`.")
     st.warning("Прогон unit-тестов выполняется в терминале. Появление страницы не означает, что тесты прошли.")
+
+# Сквозной нижний блок источников — на каждой странице MED, как в MESM.
+st.divider()
+st.markdown("### Источники и происхождение данных")
+source_rows = [
+    {"Источник": "PubMed / NCBI", "Назначение": "Библиографические сведения", "Подключение": "API реализован"},
+    {"Источник": "ClinicalTrials.gov", "Назначение": "Исследования и версии NCT", "Подключение": "API реализован"},
+    {"Источник": "OpenAlex", "Назначение": "Обнаружение сайтов и тематик", "Подключение": "Кандидаты на проверке"},
+    {"Источник": "Расширенный каталог MED", "Назначение": "Справочники РФ, биотехнологии и нейроархивы", "Подключение": "17 кандидатов"},
+]
+st.dataframe(source_rows, use_container_width=True, hide_index=True)
+status = collection_status()
+st.caption("Журнал автообновлений: " + status["description"])
+if status["latest"]:
+    st.dataframe(status["latest"], use_container_width=True, hide_index=True)
+st.caption("Результаты автоматически найденных страниц не считаются медицинскими рекомендациями. Новые источники требуют проверки.")
