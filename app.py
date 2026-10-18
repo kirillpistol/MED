@@ -12,6 +12,7 @@ from research import search_publications
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 import re
+import sqlite3
 
 app = FastAPI(title="MED", docs_url=None, redoc_url=None)
 
@@ -113,7 +114,7 @@ def clinical_studies(q: str = Query(min_length=3, max_length=120),
         results = search_studies(q, limit)
         try:
             results["archive"] = archive_public_studies(results["records"])
-        except (OSError, ValueError, RuntimeError):
+        except (OSError, ValueError, RuntimeError, sqlite3.Error):
             results["archive"] = {"enabled": True, "error": "archive temporarily unavailable"}
         return results
     except ValueError as exc:
