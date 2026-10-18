@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from research import search_publications
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
+from analytics import study_analytics
 import re
 import sqlite3
 
@@ -128,3 +129,11 @@ def clinical_study_history(nct_id: str):
         raise HTTPException(status_code=422, detail="Invalid NCT identifier")
     return {"source_id": "clinicaltrials", "external_id": nct_id,
             "versions": study_history(nct_id)}
+
+@app.get("/analytics/studies")
+def public_study_analytics():
+    """Descriptive counts and version changes from MED's local public-study archive."""
+    try:
+        return study_analytics()
+    except Exception:
+        raise HTTPException(status_code=503, detail="Study analytics temporarily unavailable")
