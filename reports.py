@@ -6,6 +6,7 @@ import json
 from typing import Any
 from analytics import study_analytics
 from quality import archive_quality
+from themes import summarize_themes
 
 REPORT_SCHEMA = "med.research.report"
 
@@ -30,6 +31,8 @@ def generate_research_report(db_path: str | None = None) -> dict[str, Any]:
         "data_checksum_sha256": digest,
         "data": calculation,
         "data_quality": archive_quality(db_path),
+        "research_themes": summarize_themes(db_path),
+        "sections": ["Обзор", "Исследования", "Аналитика", "Качество данных", "Кровь", "Заболевания", "Повреждения", "Восстановление тканей", "Технологии улучшения функций организма", "Документы"],
         "methods": {
             "studies": "Count distinct NCT identifiers in local public-metadata archive.",
             "archived_versions": "Count archived versions identified by record checksum.",
