@@ -38,6 +38,7 @@ services:
       MED_HISTORY_DB: /var/lib/med/research.sqlite3
       MED_COLLECTION_DB: /var/lib/med/collection.sqlite3
       MED_DISCOVERY_DB: /var/lib/med/discovery.sqlite3
+      MED_REPORTS_DB: /var/lib/med/reports.sqlite3
       HOME: /tmp
     volumes:
       - med_history:/var/lib/med
