@@ -10,6 +10,7 @@ from pathlib import Path
 import streamlit as st
 
 from analytics import study_analytics
+from reports import generate_research_report
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from research import search_publications
@@ -122,10 +123,11 @@ elif section == "Аналитика":
 
 elif section == "Документы":
     st.subheader("Отчёты и источники")
-    data = summary()
+    data = generate_research_report()
     payload = json.dumps(data, ensure_ascii=False, indent=2)
     st.download_button("Экспортировать отчёт JSON", payload, "med-research-report.json",
                        mime="application/json")
+    st.caption("В отчёте указаны источник, метод расчёта, ограничения и SHA-256 данных.")
     st.markdown("#### История исследования")
     nct = st.text_input("Идентификатор NCT", placeholder="NCT12345678")
     if nct:
