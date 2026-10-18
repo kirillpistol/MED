@@ -9,6 +9,7 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from research import search_publications
+from clinical_trials import search_studies
 
 app = FastAPI(title="MED", docs_url=None, redoc_url=None)
 
@@ -101,3 +102,14 @@ def publications(q: str = Query(min_length=3, max_length=120),
     except Exception:
         # Do not expose upstream URLs or diagnostic details through the public API.
         raise HTTPException(status_code=503, detail="Research provider temporarily unavailable")
+
+@app.get("/research/studies")
+def clinical_studies(q: str = Query(min_length=3, max_length=120),
+                     limit: int = Query(default=5, ge=1, le=10)):
+    """Normalized public ClinicalTrials.gov registry metadata."""
+    try:
+        return search_studies(q, limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception:
+        raise HTTPException(status_code=503, detail="Clinical trial registry temporarily unavailable")
