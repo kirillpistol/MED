@@ -12,6 +12,7 @@ import streamlit as st
 from analytics import study_analytics
 from reports import generate_research_report
 from quality import archive_quality
+from themes import THEMES, summarize_themes
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from research import search_publications
@@ -34,8 +35,17 @@ st.title("MED")
 st.caption("Независимый медицинский исследовательский модуль · L3")
 st.info("Исследовательский стенд. Данные реестров и демонстрационные расчёты не являются диагнозом или рекомендацией по лечению.")
 
-section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Документы", "Тестирование"])
+section = st.sidebar.radio("Разделы", ["Обзор", "Исследования", "Аналитика", "Медицинские направления", "Документы", "Тестирование"])
 st.sidebar.caption("MED работает независимо от CORE, L2 и приложения GENESIS.")
+st.sidebar.markdown("### Сводка MED")
+if st.sidebar.button("Сформировать общий отчёт", type="primary", use_container_width=True):
+    st.session_state["med_consolidated_report"] = generate_research_report()
+if "med_consolidated_report" in st.session_state:
+    st.sidebar.download_button("Скачать общую сводку · JSON",
+        json.dumps(st.session_state["med_consolidated_report"], ensure_ascii=False, indent=2),
+        file_name="med-full-report.json", mime="application/json", use_container_width=True)
+    st.sidebar.caption("Отчёт сформирован по локальному архиву; сетевые запросы отдельно.")
+
 
 def summary():
     return study_analytics()
@@ -127,13 +137,51 @@ elif section == "Аналитика":
         st.caption("Пока не зарегистрировано нескольких версий одной записи.")
     st.caption("Это статистика собранной выборки, не показатель заболеваемости или эффективности.")
 
+elif section == "Медицинские направления":
+    st.subheader("Направления медицинских исследований")
+    selected = st.selectbox("Раздел", list(THEMES.keys()),
+                            format_func=lambda key: THEMES[key]["name"])
+    theme = THEMES[selected]
+    st.caption("Поиск публикаций и исследований; не индивидуальная медицинская диагностика.")
+    local = summarize_themes()["themes"][selected]
+    c1, c2 = st.columns(2)
+    c1.metric("Исследований в локальной выборке", local["matched_studies"])
+    c2.metric("Всего тематических направлений", len(THEMES))
+    if local["status_counts"]:
+        st.bar_chart(local["status_counts"])
+    if local["examples"]:
+        st.dataframe(local["examples"], use_container_width=True, hide_index=True)
+    st.markdown("#### Новые исследования")
+    source = st.radio("Источник", ["PubMed", "ClinicalTrials.gov"], horizontal=True,
+                      key="theme_source")
+    query = st.text_input("Поисковый запрос", value=theme["query"], max_chars=120,
+                          key="theme_query_" + selected)
+    if st.button("Найти публикации по направлению", type="primary"):
+        try:
+            with st.spinner("Получение общедоступных метаданных..."):
+                response = search_publications(query, 5) if source == "PubMed" else search_studies(query, 5)
+            st.caption("Источник: " + response["provider"] + " · " + response["retrieved_at"])
+            for record in response["records"]:
+                with st.expander(record.get("title") or "Без названия"):
+                    st.json(record)
+                    st.markdown("[Первичный источник](" + record["url"] + ")")
+            if not response["records"]:
+                st.info("По запросу нет результатов.")
+        except ValueError as exc:
+            st.error(str(exc))
+        except Exception:
+            st.error("Источник временно недоступен.")
+    st.caption("Тематическая классификация выполняется по ключевым словам. Совпадения могут пересекаться.")
+
 elif section == "Документы":
-    st.subheader("Отчёты и источники")
+    st.subheader("Единая сводка MED · все разделы")
     data = generate_research_report()
     payload = json.dumps(data, ensure_ascii=False, indent=2)
-    st.download_button("Экспортировать отчёт JSON", payload, "med-research-report.json",
+    st.download_button("Скачать полный отчёт JSON", payload, "med-full-report.json",
                        mime="application/json")
-    st.caption("В отчёте указаны источник, метод расчёта, ограничения и SHA-256 данных.")
+    st.caption("Обзор, аналитика, качество записей и все пять исследовательских направлений, источники, методы, ограничения.")
+    for theme in data["research_themes"]["themes"].values():
+        st.write("**" + theme["name"] + "** — исследований в локальной выборке: " + str(theme["matched_studies"]))
     st.markdown("#### История исследования")
     nct = st.text_input("Идентификатор NCT", placeholder="NCT12345678")
     if nct:
