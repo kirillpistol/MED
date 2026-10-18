@@ -40,9 +40,7 @@ def normalize_study(study: dict, retrieved_at: str) -> dict:
         "title": identification.get("briefTitle", ""),
         "official_title": identification.get("officialTitle", ""),
         "recruitment_status": status.get("overallStatus", ""),
-        "last_update_posted": status.get("studyFirstPostDateStruct", {}).get("date", "")
-            if not status.get("lastUpdatePostDateStruct") else
-            status["lastUpdatePostDateStruct"].get("date", ""),
+        "last_update_posted": status.get("lastUpdatePostDateStruct", {}).get("date", ""),
         "study_type": design.get("studyType", ""),
         "phases": design.get("phases", []),
         "conditions": conditions.get("conditions", []),
