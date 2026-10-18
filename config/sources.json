@@ -15,9 +15,11 @@
       "provider": "ClinicalTrials.gov",
       "type": "clinical_studies",
       "endpoint": "https://clinicaltrials.gov/api/v2/studies",
-      "status": "candidate",
+      "status": "connected",
       "access": "public_metadata_only",
-      "personal_data": false
+      "personal_data": false,
+      "adapter": "clinical_trials.py",
+      "notes": "Adapter implemented; deployment/network tests pending"
     },
     {
       "id": "icd11",
