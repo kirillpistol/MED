@@ -12,6 +12,7 @@ from research import search_publications
 from clinical_trials import search_studies
 from history import archive_public_studies, study_history
 from analytics import study_analytics
+from reports import generate_research_report
 import re
 import sqlite3
 
@@ -137,3 +138,11 @@ def public_study_analytics():
         return study_analytics()
     except Exception:
         raise HTTPException(status_code=503, detail="Study analytics temporarily unavailable")
+
+@app.get("/reports/research")
+def research_report():
+    """Method-documented report on local public-study metadata."""
+    try:
+        return generate_research_report()
+    except Exception:
+        raise HTTPException(status_code=503, detail="Research report temporarily unavailable")
