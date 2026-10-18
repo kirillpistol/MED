@@ -10,6 +10,8 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from research import search_publications
 from clinical_trials import search_studies
+from history import archive_public_studies, study_history
+import re
 
 app = FastAPI(title="MED", docs_url=None, redoc_url=None)
 
@@ -108,8 +110,20 @@ def clinical_studies(q: str = Query(min_length=3, max_length=120),
                      limit: int = Query(default=5, ge=1, le=10)):
     """Normalized public ClinicalTrials.gov registry metadata."""
     try:
-        return search_studies(q, limit)
+        results = search_studies(q, limit)
+        try:
+            results["archive"] = archive_public_studies(results["records"])
+        except (OSError, ValueError, RuntimeError):
+            results["archive"] = {"enabled": True, "error": "archive temporarily unavailable"}
+        return results
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception:
         raise HTTPException(status_code=503, detail="Clinical trial registry temporarily unavailable")
+
+@app.get("/research/studies/{nct_id}/history")
+def clinical_study_history(nct_id: str):
+    if not re.fullmatch(r"NCT[0-9]{8}", nct_id):
+        raise HTTPException(status_code=422, detail="Invalid NCT identifier")
+    return {"source_id": "clinicaltrials", "external_id": nct_id,
+            "versions": study_history(nct_id)}
