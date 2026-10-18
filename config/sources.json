@@ -18,6 +18,25 @@
       "status": "candidate",
       "access": "public_metadata_only",
       "personal_data": false
+    },
+    {
+      "id": "icd11",
+      "provider": "WHO",
+      "type": "diagnosis_classification",
+      "endpoint": "https://id.who.int/",
+      "status": "candidate",
+      "access": "oauth2_credentials_required",
+      "personal_data": false,
+      "documentation": "https://icd.who.int/docs/icd-api/APIDoc-Version2/"
+    },
+    {
+      "id": "clinical_guidelines",
+      "provider": "to_be_selected",
+      "type": "clinical_guideline_documents",
+      "endpoint": null,
+      "status": "requires_source",
+      "access": "jurisdiction_and_license_pending",
+      "personal_data": false
     }
   ],
   "ingestion_policy": {
