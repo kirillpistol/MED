@@ -20,6 +20,29 @@ services:
     cpus: 0.5
     networks:
       - med_private
+  med_dashboard:
+    build: .
+    container_name: genesis-med-dashboard
+    restart: unless-stopped
+    command: ["streamlit", "run", "dashboard.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true", "--server.enableCORS=true", "--server.enableXsrfProtection=true", "--browser.gatherUsageStats=false"]
+    ports:
+      - "127.0.0.1:18501:8501"
+    environment:
+      MED_HISTORY_DB: /var/lib/med/research.sqlite3
+      MED_COLLECTION_DB: /var/lib/med/collection.sqlite3
+    volumes:
+      - med_history:/var/lib/med
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    mem_limit: 512m
+    cpus: 1.0
+    networks:
+      - med_private
   med_collector:
     build: .
     container_name: genesis-med-collector
