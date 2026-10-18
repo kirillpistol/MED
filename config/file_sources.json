@@ -1,0 +1,19 @@
+{
+  "schema": "med-file-source-manifest",
+  "sources": [],
+  "policy": {
+    "enabled_by_default": false,
+    "formats": [
+      "json",
+      "csv",
+      "xml"
+    ],
+    "max_file_mb": 5,
+    "require_https": true,
+    "require_source_attribution": true,
+    "retain_versions": true,
+    "prevent_duplicate_checksum": true,
+    "require_confirmed_download_url": true
+  },
+  "notes": "Fill only after an official direct file link, access terms and format are verified; do not use homepage URLs as downloads."
+}
