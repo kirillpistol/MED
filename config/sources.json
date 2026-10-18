@@ -1,0 +1,29 @@
+{
+  "schema": "med-source-registry",
+  "sources": [
+    {
+      "id": "pubmed",
+      "provider": "NCBI / U.S. National Library of Medicine",
+      "type": "biomedical_publications",
+      "endpoint": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
+      "status": "candidate",
+      "access": "public_metadata_only",
+      "personal_data": false
+    },
+    {
+      "id": "clinicaltrials",
+      "provider": "ClinicalTrials.gov",
+      "type": "clinical_studies",
+      "endpoint": "https://clinicaltrials.gov/api/v2/studies",
+      "status": "candidate",
+      "access": "public_metadata_only",
+      "personal_data": false
+    }
+  ],
+  "ingestion_policy": {
+    "query_scope": "public_non_patient_research_only",
+    "results_per_query_max": 10,
+    "persist_patient_data": false,
+    "source_evidence_required": true
+  }
+}
